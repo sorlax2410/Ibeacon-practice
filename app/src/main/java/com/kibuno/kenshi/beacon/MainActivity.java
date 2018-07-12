@@ -4,40 +4,30 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.axaet.ibeacon.beans.iBeaconClass;
-import com.axaet.ibeacon.service.BluetoothLeService;
+
 import com.estimote.coresdk.common.config.EstimoteSDK;
 import com.estimote.coresdk.common.requirements.SystemRequirementsChecker;
+import com.axaet.ibeacon.beans.iBeaconClass.iBeacon;
 import com.kibuno.kenshi.beacon.Adapter.DeviceAdapter;
 
 public class MainActivity extends Activity {
 
-    private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
     private iBeaconClass iBeaconClass;
     private DeviceAdapter deviceAdapter;
-    private BluetoothLeService bluetoothLeService;
-    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                //TODO:
-            }
-        }
-    };
+    private ListView listView;
 
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
@@ -54,27 +44,39 @@ public class MainActivity extends Activity {
     };
 
 
-    /**
-     * @Description:
-     * @return return the filter
-     */
-    private static IntentFilter makeGattUpdateIntentFilter() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_ONGETOTHER);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_ONGETTH);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_ONSEND);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_ONGETUUID);
-        intentFilter.addAction(BluetoothLeService.ACTION_PASSWORD_ERROR);
-        intentFilter.addAction(BluetoothLeService.ACTION_PASSWORD_SUCCESS);
-        return intentFilter;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        listView = findViewById(R.id.listview);
+        deviceAdapter = new DeviceAdapter(this);
+        iBeaconClass = com.axaet.ibeacon.beans.iBeaconClass.getInstance();
+
+        listView.setAdapter(deviceAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int itemIndex, long l) {
+                final iBeacon device = deviceAdapter.getItem(itemIndex);
+                if(device.deviceName.contains("_n")) {
+                    Intent intent = new Intent(
+                            MainActivity.this,
+                            ModifyBeaconActivity.class
+                    );
+                    intent.putExtra("address", device.deviceAddress);
+                    intent.putExtra("name", device.deviceName);
+                    startActivity(intent);
+                }
+                else {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Cannot connect to device. " +
+                                    "Are you sure the device(s) are working perfectly?",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+            }
+        });
+
         initBluetooth();
     }
 
@@ -91,11 +93,12 @@ public class MainActivity extends Activity {
         SystemRequirementsChecker.checkWithDefaultDialogs(this);
     }
 
+    /**
+     * @Description: initialize bluetooth low power
+     */
     public void initBluetooth() {
         showEnergySupport();
         openBluetooth();
-
-        iBeaconClass = com.axaet.ibeacon.beans.iBeaconClass.getInstance();
         EstimoteSDK.initialize(
                 this,
                 "",
@@ -104,6 +107,28 @@ public class MainActivity extends Activity {
         EstimoteSDK.enableDebugLogging(true);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_startscan:
+                deviceAdapter.clearData();
+                bluetoothAdapter.stopLeScan(leScanCallback);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) { Log.e("MAINACTIVITY", e.getMessage()); }
+                bluetoothAdapter.startLeScan(leScanCallback);
+                break;
+
+            case R.id.action_stopscan:
+                bluetoothAdapter.stopLeScan(leScanCallback);
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * @Description: destroy if low power not supported
+     */
     private void showEnergySupport() {
 
         if(isLowPowerSupport()) {
@@ -115,9 +140,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * @Description: check if bluetooth is enabled
+     */
     private void openBluetooth() {
 
-        bluetoothManager = (BluetoothManager)
+        BluetoothManager bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
 
         if(bluetoothManager != null)
@@ -128,26 +156,12 @@ public class MainActivity extends Activity {
 
     }
 
+    /**
+     * @Description: check if device support low power bluetooth
+     * @return true if supported and vice versa
+     */
     private boolean isLowPowerSupport() {
-        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))
-            return true;
-        return false;
+        return !getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-    private void bindBroadcastService() {
-        registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                //TODO: initiate services
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                //TODO: kill services
-            }
-        };
-        bindService(gattServiceIntent, serviceConnection, BIND_AUTO_CREATE);
-    }
 }

@@ -5,7 +5,7 @@
     tools:context="com.axaet.ibeacondemo.MainActivity">
 
     <item
-        android:id="@+id/action_stratscan"
+        android:id="@+id/action_startscan"
         android:orderInCategory="100"
         app:showAsAction="ifRoom"
         android:title="@string/action_startscan"/>

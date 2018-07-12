@@ -12,38 +12,41 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class DeviceAdapter extends CommonBaseAdpter<iBeacon> {
+public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
 
 	public DeviceAdapter(Context context) {
 		super(context);
 	}
 
-
-	public synchronized void addData(iBeacon device) {
-		if (device == null)
-			return;
-		boolean b = false;
-		for (iBeacon iBeacon : list) {
-			b = iBeacon.deviceAddress.equals(device.deviceAddress);
-			if (b) {
-				list.remove(iBeacon);
-				list.add(device);
-				break;
-			}
-		}
-		if (!b) {
-			list.add(device);
-		}
-		Collections.sort(this.list, comparator);
-		notifyDataSetChanged();
-	}
-
-	Comparator<iBeacon> comparator = new Comparator<iBeacon>() {
+	private Comparator<iBeacon> comparator = new Comparator<iBeacon>() {
 		@Override
 		public int compare(iBeacon h1, iBeacon h2) {
 			return h2.rssi - h1.rssi;
 		}
 	};
+
+	public synchronized void addData(iBeacon device) {
+		if (device == null)
+			return;
+
+		boolean existAddress = false;
+
+		for (iBeacon iBeacon : list) {
+			existAddress = iBeacon.deviceAddress.equals(device.deviceAddress);
+			if (existAddress) {
+				list.remove(iBeacon);
+				list.add(device);
+				break;
+			}
+		}
+
+		if (!existAddress)
+			list.add(device);
+
+		Collections.sort(this.list, comparator);
+		notifyDataSetChanged();
+	}
+
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -59,16 +62,24 @@ public class DeviceAdapter extends CommonBaseAdpter<iBeacon> {
 			viewHolder.deviceMinor = view.findViewById(R.id.txt_minor);
 			viewHolder.deviceRssi = view.findViewById(R.id.txt_rssi);
 			view.setTag(viewHolder);
-		} else {
-			viewHolder = (ViewHolder) view.getTag();
 		}
+		else
+			viewHolder = (ViewHolder) view.getTag();
+
 		iBeacon device = list.get(position);
-		viewHolder.deviceName.setText("Name:" + device.deviceName);
-		viewHolder.distanceMac.setText("MAC:  " + device.deviceAddress);
-		viewHolder.deviceUUID.setText("UUID:" + device.proximityUuid);
-		viewHolder.deviceMajor.setText("Major:" + device.major);
-		viewHolder.deviceMinor.setText("Minor:" + device.minor);
-		viewHolder.deviceRssi.setText("Rssi:" + device.rssi);
+		String devicename = R.string.devicename + device.deviceName,
+				deviceMAC = R.string.deviceMAC + device.deviceAddress,
+				deviceuuid = R.string.deviceUUID + device.proximityUuid,
+				devicemajor = String.valueOf(R.string.deviceMajor + device.major),
+				deviceminor = String.valueOf(R.string.deviceMinor + device.minor),
+				devicerssi = String.valueOf(R.string.deviceRSSI + device.rssi);
+
+		viewHolder.deviceName.setText(devicename);
+		viewHolder.distanceMac.setText(deviceMAC);
+		viewHolder.deviceUUID.setText(deviceuuid);
+		viewHolder.deviceMajor.setText(devicemajor);
+		viewHolder.deviceMinor.setText(deviceminor);
+		viewHolder.deviceRssi.setText(devicerssi);
 		return view;
 	}
 

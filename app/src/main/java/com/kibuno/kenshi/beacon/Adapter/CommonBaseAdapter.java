@@ -10,13 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public abstract class CommonBaseAdpter<T> extends BaseAdapter {
+public abstract class CommonBaseAdapter<T> extends BaseAdapter {
 
 	public List<T> list = new ArrayList<T>();
 	public LayoutInflater inflater;
 	public Resources resources;
 
-	public CommonBaseAdpter(Context context) {
+	public CommonBaseAdapter(Context context) {
 		inflater = LayoutInflater.from(context);
 		resources = context.getResources();
 	}
