@@ -58,4 +58,10 @@ public class BeaconProcess {
         };
         context.bindService(gattServiceIntent, serviceConnection, BIND_AUTO_CREATE);
     }
+
+    public String calculateDistance(int rssi) {
+        String result;
+        result = String.valueOf(rssi);
+        return result;
+    }
 }
