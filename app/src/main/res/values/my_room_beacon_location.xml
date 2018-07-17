@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="topLeftX">285</integer>
+    <integer name="topLeftY">38</integer>
+    <integer name="topRightX">608</integer>
+    <integer name="topRightY">38</integer>
+    <integer name="bottomLeftX">285</integer>
+    <integer name="bottomLeftY">534</integer>
+    <integer name="bottomRightX">608</integer>
+    <integer name="bottomRightY">534</integer>
+</resources>
