@@ -164,6 +164,10 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(View v) { stopBluetooth(view); }
             });
+            Log.d("BEFORE", String.valueOf(beacons.size()));
+            for(int index = 0; index < beacons.size(); index++)
+                beacons.remove(index);
+            Log.d("AFTER", String.valueOf(beacons.size()));
         }
 
         else {
