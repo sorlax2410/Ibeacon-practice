@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -22,22 +23,28 @@ import com.estimote.coresdk.common.requirements.SystemRequirementsChecker;
 import com.axaet.ibeacon.beans.iBeaconClass.iBeacon;
 import com.kibuno.kenshi.beacon.Adapter.DeviceAdapter;
 
+import java.util.ArrayList;
+
 public class MainActivity extends Activity {
 
     private BluetoothAdapter bluetoothAdapter;
     private iBeaconClass iBeaconClass;
     private DeviceAdapter deviceAdapter;
     private ListView listView;
+    private Button scanButton,
+            sendButton;
+    private ArrayList<iBeacon>beacons = new ArrayList<>();
 
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
-            if(bluetoothDevice != null && rssi != 127) {
+            if(bluetoothDevice != null /*&& rssi != 127*/) {
                 iBeaconClass.iBeacon beacon = iBeaconClass.formToiBeacon(
                                 bluetoothDevice,
                                 rssi,
                                 scanRecord
                         );
+                beacons.add(beacon);
                 deviceAdapter.addData(beacon);
             }
         }
@@ -48,6 +55,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        scanButton = findViewById(R.id.btnScan);
+        sendButton = findViewById(R.id.btnSend);
+
         listView = findViewById(R.id.listview);
         deviceAdapter = new DeviceAdapter(this);
         iBeaconClass = com.axaet.ibeacon.beans.iBeaconClass.getInstance();
@@ -111,23 +121,74 @@ public class MainActivity extends Activity {
         EstimoteSDK.enableDebugLogging(true);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_startscan:
-                deviceAdapter.clearData();
-                bluetoothAdapter.stopLeScan(leScanCallback);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) { Log.e("MAINACTIVITY", e.getMessage()); }
-                bluetoothAdapter.startLeScan(leScanCallback);
-                break;
-
-            case R.id.action_stopscan:
-                bluetoothAdapter.stopLeScan(leScanCallback);
-                break;
+    public void scanBluetooth(final View view) {
+        deviceAdapter.clearData();
+        bluetoothAdapter.stopLeScan(leScanCallback);
+        try {
+            Toast.makeText(
+                    this,
+                    "Scanning .",
+                    Toast.LENGTH_SHORT
+            ).show();
+            Thread.sleep(100);
+            Toast.makeText(
+                    this,
+                    "Scanning . .",
+                    Toast.LENGTH_SHORT
+            ).show();
+            Thread.sleep(100);
+            Toast.makeText(
+                    this,
+                    "Scanning . . .",
+                    Toast.LENGTH_SHORT
+            ).show();
+            Thread.sleep(100);
         }
-        return true;
+        catch (InterruptedException e) {
+            Log.e("MAINACTIVITY",
+                    "\n\tInterrupted String: " + e.toString() +
+                            "\n\tInterrupted Message: " + e.getMessage()
+            );
+        }
+        bluetoothAdapter.startLeScan(leScanCallback);
+
+        Toast.makeText(
+                this,
+                "Scan complete",
+                Toast.LENGTH_SHORT
+        ).show();
+
+        if(!beacons.isEmpty()) {
+            scanButton.setText(R.string.stop);
+            scanButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) { stopBluetooth(view); }
+            });
+        }
+
+        else {
+            Toast.makeText(
+                    this,
+                    "no device found! Please try open this program without" +
+                            " turning on bluetooth",
+                    Toast.LENGTH_SHORT
+            ).show();
+            finish();
+        }
+    }
+
+    public void stopBluetooth(final View view) {
+        bluetoothAdapter.stopLeScan(leScanCallback);
+        Toast.makeText(
+                this,
+                "Scanning stopped successfully ^_^",
+                Toast.LENGTH_SHORT
+        ).show();
+        scanButton.setText(R.string.start);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { scanBluetooth(view); }
+        });
     }
 
     /**
@@ -152,12 +213,33 @@ public class MainActivity extends Activity {
         BluetoothManager bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
 
-        if(bluetoothManager != null)
+        if(bluetoothManager != null) {
             bluetoothAdapter = bluetoothManager.getAdapter();
 
-        if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled())
+            Toast.makeText(
+                    this,
+                    "initializing bluetooth",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+
+        if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             bluetoothAdapter.enable();
 
+            Toast.makeText(
+                    this,
+                    "bluetooth enabled",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
+
+        else {
+            Toast.makeText(
+                    this,
+                    "Bluetooth is already on and enabled",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
     }
 
     /**
