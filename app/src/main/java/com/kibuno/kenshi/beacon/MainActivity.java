@@ -8,8 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,12 +23,17 @@ import com.estimote.coresdk.common.config.EstimoteSDK;
 import com.estimote.coresdk.common.requirements.SystemRequirementsChecker;
 import com.axaet.ibeacon.beans.iBeaconClass.iBeacon;
 import com.kibuno.kenshi.beacon.Adapter.DeviceAdapter;
+import com.kibuno.kenshi.beacon.Adapter.MinewBeaconListAdapter;
+import com.minew.beaconset.MinewBeaconManager;
 
 import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
     private BluetoothAdapter bluetoothAdapter;
+    private RecyclerView mRecycle;
+    private MinewBeaconManager mMinewBeaconManager;
+    private MinewBeaconListAdapter mAdapter;
     private iBeaconClass iBeaconClass;
     private DeviceAdapter deviceAdapter;
     private ListView listView;
@@ -57,6 +63,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         scanButton = findViewById(R.id.btnScan);
         sendButton = findViewById(R.id.btnSend);
+
+        initIbeaconView();
+    }
+
+    public void initIbeaconView() {
 
         listView = findViewById(R.id.listview);
         deviceAdapter = new DeviceAdapter(this);
@@ -90,8 +101,13 @@ public class MainActivity extends Activity {
         initBluetooth();
     }
 
-    public void initIbeaconView() {
+    public void initMineBeaconView() {
 
+        mRecycle = findViewById(R.id.main_recycler);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        mRecycle.setLayoutManager(layoutManager);
+        mAdapter = new MinewBeaconListAdapter();
+        mRecycle.setAdapter(mAdapter);
     }
 
     @Override

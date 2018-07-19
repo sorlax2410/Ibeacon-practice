@@ -12,9 +12,24 @@ import com.minew.beaconset.MinewBeacon;
 
 import java.util.List;
 
-public class minewBeaconListAdapter extends RecyclerView.Adapter<minewBeaconListAdapter.MyViewHolder> {
+public class MinewBeaconListAdapter extends RecyclerView.Adapter<MinewBeaconListAdapter.MyViewHolder> {
 
     private List<MinewBeacon> mMinewBeacons;
+
+
+    public interface OnItemClickLitener {
+        void onItemClick(View view, int position);
+
+        void onItemLongClick(View view, int position);
+    }
+
+
+    private OnItemClickLitener mOnItemClickLitener;
+
+    public void setOnItemClickLitener(OnItemClickLitener mOnItemClickLitener) {
+        this.mOnItemClickLitener = mOnItemClickLitener;
+    }
+
     /**
      * Called when RecyclerView needs a new {@link ViewHolder} of the given type to represent
      * an item.
@@ -37,11 +52,11 @@ public class minewBeaconListAdapter extends RecyclerView.Adapter<minewBeaconList
      */
     @NonNull
     @Override
-    public minewBeaconListAdapter.MyViewHolder onCreateViewHolder(
-            @NonNull ViewGroup parent,
-            int viewType)
+    public MinewBeaconListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                                  int viewType)
     {
-        return null;
+        View view = View.inflate(parent.getContext(), R.layout.minew_beacon_main_item, null);
+        return new MyViewHolder(view);
     }
 
     /**
@@ -65,8 +80,31 @@ public class minewBeaconListAdapter extends RecyclerView.Adapter<minewBeaconList
      * @param position The position of the item within the adapter's data set.
      */
     @Override
-    public void onBindViewHolder(@NonNull minewBeaconListAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MinewBeaconListAdapter.MyViewHolder holder,
+                                 int position)
+    {
 
+        holder.setDataAndUi(mMinewBeacons.get(position));
+
+        // Set a click event if a callback is set
+        if (mOnItemClickLitener != null) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int pos = holder.getLayoutPosition();
+                    mOnItemClickLitener.onItemClick(holder.itemView, pos);
+                }
+            });
+
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int pos = holder.getLayoutPosition();
+                    mOnItemClickLitener.onItemLongClick(holder.itemView, pos);
+                    return false;
+                }
+            });
+        }
     }
 
     /**
@@ -81,6 +119,15 @@ public class minewBeaconListAdapter extends RecyclerView.Adapter<minewBeaconList
         return 0;
     }
 
+    public void setData(List<MinewBeacon> minewBeacons) {
+        this.mMinewBeacons = minewBeacons;
+        notifyDataSetChanged();
+
+    }
+
+    public MinewBeacon getData(int position) {
+        return mMinewBeacons.get(position);
+    }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
