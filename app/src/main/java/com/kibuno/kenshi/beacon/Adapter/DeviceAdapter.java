@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.axaet.ibeacon.beans.iBeaconClass.iBeacon;
+import com.kibuno.kenshi.beacon.Core.DistanceCalculation;
 import com.kibuno.kenshi.beacon.R;
 
 import android.annotation.SuppressLint;
@@ -62,14 +63,41 @@ public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
 		else
 			viewHolder = (ViewHolder) view.getTag();
 
-		iBeacon device = list.get(position);
+		iBeacon device = list.get(position);/*
+		device.distance = String.valueOf(
+				DistanceCalculation.calculateDistance(
+						device.txPower,
+						device.rssi)
+		);*/
+		String calculateDist = String.valueOf(
+				DistanceCalculation.calculateDist(
+						device.txPower,
+						(double)device.rssi
+				)
+		);
+		String calculateDistance = String.valueOf(
+				DistanceCalculation.calculateDistance(
+						device.txPower,
+						device.rssi
+				)
+		);
+		String computeAccuracy = String.valueOf(
+				DistanceCalculation.computeAccuracy(
+						device.txPower,
+						(double)device.rssi
+				)
+		);
 		String deviceInfo = "Device name: " + device.deviceName + "\n" +
 				"MAC: " + device.deviceAddress,
 
-				deviceMeasurement = "UUID: " + device.proximityUuid + "\n" +
-				"Major: " + String.valueOf( device.major) + "\n" +
-				"Minor: " + String.valueOf( device.minor) + "\n" +
-				"RSSI: " + String.valueOf(device.rssi) + "\n";
+				deviceMeasurement =
+						"UUID: " + device.proximityUuid + "\n" +
+						"Major: " + String.valueOf( device.major) + "\n" +
+						"Minor: " + String.valueOf( device.minor) + "\n" +
+						"RSSI: " + String.valueOf(device.rssi) + "\n" +
+						"Distance 1: " + calculateDist + "\n" +
+						"Distance 2: " + calculateDistance + "\n" +
+						"Distance 3: " + computeAccuracy;
 
 		viewHolder.deviceInfo.setText(deviceInfo);
 		viewHolder.deviceMeasurement.setText(deviceMeasurement);
