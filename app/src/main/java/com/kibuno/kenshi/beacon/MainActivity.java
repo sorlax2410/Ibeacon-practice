@@ -80,6 +80,10 @@ public class MainActivity extends Activity {
         initBluetooth();
     }
 
+    public void initIbeaconView() {
+
+    }
+
     @Override
     protected void onPause() {
         super.onPause();

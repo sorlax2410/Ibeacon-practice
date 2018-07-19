@@ -31,4 +31,6 @@
     <string name="calculate_distance">Calculate Distance</string>
     <string name="buy_product_view">If you buy the product with temperature and humidity, you can click the button below to read the temperature and humidity</string>
     <string name="btn_buy_product">read temperature and humidity</string>
+    <string name="start">START</string>
+    <string name="send">SEND</string>
 </resources>

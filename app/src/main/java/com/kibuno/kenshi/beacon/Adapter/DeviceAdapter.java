@@ -55,41 +55,30 @@ public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
 		if (view == null) {
 			view = inflater.inflate(R.layout.listitem_device, null);
 			viewHolder = new ViewHolder();
-			viewHolder.distanceMac = view.findViewById(R.id.txt_mac);
-			viewHolder.deviceName = view.findViewById(R.id.txt_deviceName);
-			viewHolder.deviceUUID = view.findViewById(R.id.txt_uuid);
-			viewHolder.deviceMajor = view.findViewById(R.id.txt_major);
-			viewHolder.deviceMinor = view.findViewById(R.id.txt_minor);
-			viewHolder.deviceRssi = view.findViewById(R.id.txt_rssi);
+			viewHolder.deviceInfo = view.findViewById(R.id.txt_deviceInfo);
+			viewHolder.deviceMeasurement = view.findViewById(R.id.txt_deviceMeasurement);
 			view.setTag(viewHolder);
 		}
 		else
 			viewHolder = (ViewHolder) view.getTag();
 
 		iBeacon device = list.get(position);
-		String devicename = R.string.devicename + device.deviceName,
-				deviceMAC = R.string.deviceMAC + device.deviceAddress,
-				deviceuuid = R.string.deviceUUID + device.proximityUuid,
-				devicemajor = String.valueOf(R.string.deviceMajor + device.major),
-				deviceminor = String.valueOf(R.string.deviceMinor + device.minor),
-				devicerssi = String.valueOf(R.string.deviceRSSI + device.rssi);
+		String deviceInfo = "Device name: " + device.deviceName + "\n" +
+				"MAC: " + device.deviceAddress,
 
-		viewHolder.deviceName.setText(devicename);
-		viewHolder.distanceMac.setText(deviceMAC);
-		viewHolder.deviceUUID.setText(deviceuuid);
-		viewHolder.deviceMajor.setText(devicemajor);
-		viewHolder.deviceMinor.setText(deviceminor);
-		viewHolder.deviceRssi.setText(devicerssi);
+				deviceMeasurement = "UUID: " + device.proximityUuid + "\n" +
+				"Major: " + String.valueOf( device.major) + "\n" +
+				"Minor: " + String.valueOf( device.minor) + "\n" +
+				"RSSI: " + String.valueOf(device.rssi) + "\n";
+
+		viewHolder.deviceInfo.setText(deviceInfo);
+		viewHolder.deviceMeasurement.setText(deviceMeasurement);
 		return view;
 	}
 
 	static class ViewHolder {
-		TextView deviceName;
-		TextView deviceUUID;
-		TextView distanceMac;
-		TextView deviceMajor;
-		TextView deviceMinor;
-		TextView deviceRssi;
+		TextView deviceInfo;
+		TextView deviceMeasurement;
 	}
 
 }
