@@ -13,7 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.opencv.video.KalmanFilter;
+
 public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
+
+	String calculateDist, calculateDistance, computeAccuracy;
 
 	public DeviceAdapter(Context context) {
 		super(context);
@@ -63,25 +67,27 @@ public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
 		else
 			viewHolder = (ViewHolder) view.getTag();
 
-		iBeacon device = list.get(position);/*
-		device.distance = String.valueOf(
-				DistanceCalculation.calculateDistance(
-						device.txPower,
-						device.rssi)
-		);*/
-		String calculateDist = String.valueOf(
+		iBeacon device = list.get(position);
+		calculateDist = String.valueOf(
 				DistanceCalculation.calculateDist(
 						device.txPower,
 						(double)device.rssi
 				)
 		);
-		String calculateDistance = String.valueOf(
+
+		calculateDistance = String.valueOf(
 				DistanceCalculation.calculateDistance(
 						device.txPower,
 						device.rssi
 				)
 		);
-		String computeAccuracy = String.valueOf(
+		/*
+		device.distance = String.valueOf(
+				DistanceCalculation.calculateDistance(
+						device.txPower,
+						device.rssi)
+		);*/
+		computeAccuracy = String.valueOf(
 				DistanceCalculation.computeAccuracy(
 						device.txPower,
 						(double)device.rssi
@@ -103,6 +109,11 @@ public class DeviceAdapter extends CommonBaseAdapter<iBeacon> {
 		viewHolder.deviceMeasurement.setText(deviceMeasurement);
 		return view;
 	}
+
+
+	public String getCalculateDist() { return calculateDist; }
+	public String getCalculateDistance() { return calculateDistance; }
+	public String getComputeAccuracy() { return computeAccuracy; }
 
 	static class ViewHolder {
 		TextView deviceInfo;
